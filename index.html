@@ -1,19 +1,4 @@
-[00:19, 04/06/2025] Fernandes: <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Consumo de Combustível</title>
-    <!-- Inclui Tailwind CSS para estilização rápida e responsiva -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- LINK PARA O MANIFEST PWA - CAMINHO CORRIGIDO -->
-    <!-- Se o site for jaddyf.github.io/Controle-de-Combust-vel/, use /Controle-de-Combust-vel/manifest.json -->
-    <!-- Se o site for jaddyf.github.io/, use /manifest.json -->
-    <link rel="manifest" href="/Controle-de-Combust-vel/manifest.json">
-    <style>
-       …
-[00:27, 04/06/2025] Fernandes: <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -270,7 +255,7 @@
         const formatDate = (dateString) => {
             if (!dateString) return '';
             const [year, month, day] = dateString.split('-');
-            return ${day}/${month}/${year};
+            return `${day}/${month}/${year}`;
         };
 
         // --- Elementos DOM ---
@@ -298,7 +283,7 @@
 
         // --- Funções de Armazenamento de Dados (LocalStorage) ---
         const getLocalStorageKey = (type, month, year) => {
-            return combustivel_${type}_${year}-${String(month).padStart(2, '0')};
+            return `combustivel_${type}_${year}-${String(month).padStart(2, '0')}`;
         };
 
         const loadData = (type, month = currentDashboardMonth, year = currentDashboardYear) => {
@@ -402,8 +387,8 @@
             const custoMedioLitro = totalLitros > 0 ? totalCustoCombustivel / totalLitros : 0;
             const custoPorKm = distanciaPercorrida > 0 ? totalCustoCombustivel / distanciaPercorrida : 0;
 
-            dashboardDistanciaElem.textContent = ${distanciaPercorrida.toLocaleString('pt-BR')} km;
-            dashboardLitrosElem.textContent = ${totalLitros.toFixed(2).replace('.', ',')} L;
+            dashboardDistanciaElem.textContent = `${distanciaPercorrida.toLocaleString('pt-BR')} km`;
+            dashboardLitrosElem.textContent = `${totalLitros.toFixed(2).replace('.', ',')} L`;
             dashboardCustoTotalElem.textContent = formatCurrency(totalCustoCombustivel);
             dashboardConsumoMedioElem.textContent = formatKmPerLiter(consumoMedio);
             dashboardCustoLitroElem.textContent = formatRealPerLiter(custoMedioLitro);
