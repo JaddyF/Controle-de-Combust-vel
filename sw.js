@@ -1,20 +1,21 @@
-const CACHE_NAME = 'fuel-tracker-v1'; // Nome do cache para esta versão da aplicação
+const CACHE_NAME = 'fuel-tracker-v3'; // Aumente a versão do cache para forçar a atualização
 const urlsToCache = [
-    '/', // A raiz da aplicação
-    '/index.html', // O arquivo HTML principal
+    './', // A raiz da aplicação (o index.html)
+    './index.html', // O arquivo HTML principal
+    './manifest.json', // O arquivo manifest.json (caminho relativo)
+    './sw.js', // O próprio service worker
     'https://cdn.tailwindcss.com', // Tailwind CSS CDN
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' // Fonte Inter
     // Adicione aqui outros recursos estáticos que você queira cachear, como imagens de ícones
-    // Ex: '/icon-192x192.png',
-    // Ex: '/icon-512x512.png'
 ];
 
 // Evento 'install': Cacheia os recursos estáticos quando o service worker é instalado
 self.addEventListener('install', (event) => {
+    console.log('Service Worker: Instalando e cacheando recursos...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('Cache aberto');
+                console.log('Cache aberto:', CACHE_NAME);
                 return cache.addAll(urlsToCache);
             })
             .catch(error => {
@@ -48,17 +49,17 @@ self.addEventListener('fetch', (event) => {
                     })
                     .catch(() => {
                         // Se a requisição de rede falhar (ex: offline), você pode retornar uma página offline
-                        // ou um fallback específico. Para este exemplo, apenas falhamos.
                         console.log('Requisição de rede falhou para:', event.request.url);
-                        // Você pode adicionar um fallback para uma página offline aqui:
+                        // Para um fallback offline, você precisaria de uma página offline.html no cache
                         // return caches.match('/offline.html');
                     });
             })
     );
 });
 
-// Evento 'activate': Limpa caches antigos
+// Evento 'activate': Limpa caches antigos e ativa o service worker imediatamente
 self.addEventListener('activate', (event) => {
+    console.log('Service Worker: Ativando e limpando caches antigos...');
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
@@ -71,4 +72,6 @@ self.addEventListener('activate', (event) => {
             );
         })
     );
+    // Garante que o service worker seja ativado imediatamente após a instalação
+    event.waitUntil(self.clients.claim());
 });
