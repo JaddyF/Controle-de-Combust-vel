@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Consumo de Combustível</title>
+    <!-- Inclui Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- LINK PARA O MANIFEST PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Cor de fundo suave */
+        }
+        .tab-button.active {
+            background-color: #ffffff;
+            border-bottom-color: #4f46e5; /* Cor da aba ativa */
+            color: #4f46e5;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* Estilos para formatação condicional de consumo/custo */
+        .consumo-bom {
+            background-color: #d1fae5; /* Verde claro */
+            color: #065f46; /* Texto verde escuro */
+        }
+        .consumo-medio {
+            background-color: #fffbeb; /* Amarelo claro */
+            color: #b45309; /* Texto laranja escuro */
+        }
+        .consumo-alto {
+            background-color: #fee2e2; /* Vermelho claro */
+            color: #991b1b; /* Texto vermelho escuro */
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8 lg:p-10">
+    <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-xl p-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Controle de Consumo de Combustível</h1>
+
+        <!-- Abas de Navegação -->
+        <div class="flex border-b border-gray-200 mb-6 overflow-x-auto">
+            <button class="tab-button py-3 px-4 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:border-indigo-600 border-b-2 border-transparent transition duration-300 ease-in-out rounded-t-lg active whitespace-nowrap" data-tab="dashboard">Dashboard</button>
+            <button class="tab-button py-3 px-4 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:border-indigo-600 border-b-2 border-transparent transition duration-300 ease-in-out rounded-t-lg whitespace-nowrap" data-tab="abastecimentos">Registros de Abastecimento</button>
+            <button class="tab-button py-3 px-4 text-sm font-medium text-gray-600 hover:text-indigo-600 hover:border-indigo-600 border-b-2 border-transparent transition duration-300 ease-in-out rounded-t-lg whitespace-nowrap" data-tab="manutencao">Manutenção/Outros Custos</button>
+        </div>
+
+        <!-- Conteúdo das Abas -->
+
+        <!-- Folha: Dashboard -->
+        <div id="dashboard" class="tab-content active p-4 bg-gray-50 rounded-lg">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Dashboard de Consumo</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label for="dashboardMes" class="block text-sm font-medium text-gray-700">Mês:</label>
+                    <select id="dashboardMes" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <!-- Opções de mês serão preenchidas via JS -->
+                    </select>
+                </div>
+                <div>
+                    <label for="dashboardAno" class="block text-sm font-medium text-gray-700">Ano:</label>
+                    <select id="dashboardAno" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <!-- Opções de ano serão preenchidas via JS -->
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="bg-blue-100 p-4 rounded-lg shadow-sm">
+                    <p class="text-sm font-medium text-blue-700">Distância Percorrida</p>
+                    <p id="dashboardDistancia" class="text-2xl font-bold text-blue-900 mt-1">0 km</p>
+                </div>
+                <div class="bg-purple-100 p-4 rounded-lg shadow-sm">
+                    <p class="text-sm font-medium text-purple-700">Litros Totais Abastecidos</p>
+                    <p id="dashboardLitros" class="text-2xl font-bold text-purple-900 mt-1">0 L</p>
+                </div>
+                <div class="bg-red-100 p-4 rounded-lg shadow-sm">
+                    <p class="text-sm font-medium text-red-700">Custo Total de Combustível</p>
+                    <p id="dashboardCustoTotal" class="text-2xl font-bold text-red-900 mt-1">R$ 0,00</p>
+                </div>
+                <div id="dashboardConsumoMedioCard" class="p-4 rounded-lg shadow-sm transition-colors duration-300">
+                    <p class="text-sm font-medium text-gray-700">Consumo Médio</p>
+                    <p id="dashboardConsumoMedio" class="text-2xl font-bold mt-1">0,00 km/L</p>
+                </div>
+                <div class="bg-yellow-100 p-4 rounded-lg shadow-sm">
+                    <p class="text-sm font-medium text-yellow-700">Custo Médio por Litro</p>
+                    <p id="dashboardCustoLitro" class="text-2xl font-bold text-yellow-900 mt-1">R$ 0,00/L</p>
+                </div>
+                <div id="dashboardCustoKmCard" class="p-4 rounded-lg shadow-sm transition-colors duration-300">
+                    <p class="text-sm font-medium text-gray-700">Custo por Quilômetro</p>
+                    <p id="dashboardCustoKm" class="text-2xl font-bold mt-1">R$ 0,00/km</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Folha: Registros de Abastecimento -->
+        <div id="abastecimentos" class="tab-content p-4 bg-gray-50 rounded-lg">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Registros de Abastecimento</h2>
+            <form id="formAbastecimento" class="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label for="abastecimentoData" class="block text-sm font-medium text-gray-700">Data:</label>
+                    <input type="date" id="abastecimentoData" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="abastecimentoQuilometragem" class="block text-sm font-medium text-gray-700">Quilometragem Atual (km):</label>
+                    <input type="number" id="abastecimentoQuilometragem" step="1" placeholder="Ex: 50000" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="abastecimentoLitros" class="block text-sm font-medium text-gray-700">Litros Abastecidos (L):</label>
+                    <input type="number" id="abastecimentoLitros" step="0.01" placeholder="Ex: 35.50" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="abastecimentoPrecoLitro" class="block text-sm font-medium text-gray-700">Preço por Litro (R$/L):</label>
+                    <input type="number" id="abastecimentoPrecoLitro" step="0.01" placeholder="Ex: 5.99" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="abastecimentoTipoCombustivel" class="block text-sm font-medium text-gray-700">Tipo de Combustível:</label>
+                    <select id="abastecimentoTipoCombustivel" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="">Selecione o tipo</option>
+                        <option value="Gasolina Comum">Gasolina Comum</option>
+                        <option value="Gasolina Aditivada">Gasolina Aditivada</option>
+                        <option value="Etanol">Etanol</option>
+                        <option value="Diesel">Diesel</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="abastecimentoPosto" class="block text-sm font-medium text-gray-700">Posto de Combustível (Opcional):</label>
+                    <input type="text" id="abastecimentoPosto" placeholder="Ex: Posto Ipiranga" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div class="lg:col-span-3">
+                    <label for="abastecimentoObservacoes" class="block text-sm font-medium text-gray-700">Observações (Opcional):</label>
+                    <textarea id="abastecimentoObservacoes" rows="2" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                </div>
+                <div class="lg:col-span-3">
+                    <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out">Adicionar Abastecimento</button>
+                </div>
+            </form>
+
+            <div class="overflow-x-auto rounded-lg shadow">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quilometragem (km)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Litros (L)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço/L (R$)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Total (R$)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posto</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Consumo Anterior (km/L)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Observações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaAbastecimentos" class="bg-white divide-y divide-gray-200">
+                        <!-- Linhas de abastecimento serão adicionadas aqui via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Folha: Manutenção/Outros Custos -->
+        <div id="manutencao" class="tab-content p-4 bg-gray-50 rounded-lg">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">Manutenção e Outros Custos</h2>
+            <form id="formManutencao" class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="manutencaoData" class="block text-sm font-medium text-gray-700">Data:</label>
+                    <input type="date" id="manutencaoData" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="manutencaoTipoGasto" class="block text-sm font-medium text-gray-700">Tipo de Gasto:</label>
+                    <select id="manutencaoTipoGasto" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="">Selecione o tipo</option>
+                        <option value="Troca de Óleo">Troca de Óleo</option>
+                        <option value="Pneus">Pneus</option>
+                        <option value="Revisão">Revisão</option>
+                        <option value="Estacionamento">Estacionamento</option>
+                        <option value="Multa">Multa</option>
+                        <option value="Seguro">Seguro</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="manutencaoDescricao" class="block text-sm font-medium text-gray-700">Descrição:</label>
+                    <input type="text" id="manutencaoDescricao" placeholder="Ex: Troca de óleo e filtro" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="manutencaoValor" class="block text-sm font-medium text-gray-700">Valor (R$):</label>
+                    <input type="number" id="manutencaoValor" step="0.01" placeholder="Ex: 250.00" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="manutencaoQuilometragem" class="block text-sm font-medium text-gray-700">Quilometragem (km) (Opcional):</label>
+                    <input type="number" id="manutencaoQuilometragem" step="1" placeholder="Ex: 50000" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out">Adicionar Gasto</button>
+                </div>
+            </form>
+
+            <div class="overflow-x-auto rounded-lg shadow">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Gasto</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor (R$)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quilometragem (km)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaManutencao" class="bg-white divide-y divide-gray-200">
+                        <!-- Linhas de manutenção serão adicionadas aqui via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Funções Auxiliares ---
+        // Formata um valor numérico para moeda brasileira (R$)
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        };
+
+        // Formata um valor numérico para km/L
+        const formatKmPerLiter = (value) => {
+            return value.toFixed(2).replace('.', ',') + ' km/L';
+        };
+
+        // Formata um valor numérico para R$/L
+        const formatRealPerLiter = (value) => {
+            return formatCurrency(value) + '/L';
+        };
+
+        // Formata um valor numérico para R$/km
+        const formatRealPerKm = (value) => {
+            return formatCurrency(value) + '/km';
+        };
+
+        // Formata uma string de data (AAAA-MM-DD) para DD/MM/AAAA
+        const formatDate = (dateString) => {
+            if (!dateString) return '';
+            const [year, month, day] = dateString.split('-');
+            return ${day}/${month}/${year};
+        };
+
+        // --- Elementos DOM ---
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Dashboard
+        const dashboardMesSelect = document.getElementById('dashboardMes');
+        const dashboardAnoSelect = document.getElementById('dashboardAno');
+        const dashboardDistanciaElem = document.getElementById('dashboardDistancia');
+        const dashboardLitrosElem = document.getElementById('dashboardLitros');
+        const dashboardCustoTotalElem = document.getElementById('dashboardCustoTotal');
+        const dashboardConsumoMedioElem = document.getElementById('dashboardConsumoMedio');
+        const dashboardConsumoMedioCard = document.getElementById('dashboardConsumoMedioCard');
+        const dashboardCustoLitroElem = document.getElementById('dashboardCustoLitro');
+        const dashboardCustoKmElem = document.getElementById('dashboardCustoKm');
+        const dashboardCustoKmCard = document.getElementById('dashboardCustoKmCard');
+
+        // Registros de Abastecimento
+        const formAbastecimento = document.getElementById('formAbastecimento');
+        const tabelaAbastecimentos = document.getElementById('tabelaAbastecimentos');
+
+        // Manutenção/Outros Custos
+        const formManutencao = document.getElementById('formManutencao');
+        const tabelaManutencao = document.getElementById('tabelaManutencao');
+
+        // --- Variáveis de Estado ---
+        let currentDashboardMonth = new Date().getMonth() + 1;
+        let currentDashboardYear = new Date().getFullYear();
+
+        // --- Funções de Armazenamento de Dados (LocalStorage) ---
+        const getLocalStorageKey = (type, month, year) => {
+            return combustivel_${type}_${year}-${String(month).padStart(2, '0')};
+        };
+
+        const loadData = (type, month = currentDashboardMonth, year = currentDashboardYear) => {
+            const data = localStorage.getItem(getLocalStorageKey(type, month, year));
+            return data ? JSON.parse(data) : [];
+        };
+
+        const saveData = (type, data, month = currentDashboardMonth, year = currentDashboardYear) => {
+            localStorage.setItem(getLocalStorageKey(type, month, year), JSON.stringify(data));
+        };
+
+        // --- Funções de Renderização de Tabelas ---
+        const renderAbastecimentosTable = () => {
+            const abastecimentos = loadData('abastecimentos', currentDashboardMonth, currentDashboardYear)
+                                    .sort((a, b) => new Date(a.data) - new Date(b.data)); // Ordena por data
+
+            tabelaAbastecimentos.innerHTML = ''; // Limpa a tabela
+
+            abastecimentos.forEach((item, index) => {
+                const row = tabelaAbastecimentos.insertRow();
+                row.className = 'hover:bg-gray-50';
+
+                // Calcula o consumo anterior para esta linha
+                let consumoAnterior = '';
+                if (index > 0) {
+                    const prevItem = abastecimentos[index - 1];
+                    const distanciaPercorrida = item.quilometragem - prevItem.quilometragem;
+                    if (prevItem.litros > 0) {
+                        consumoAnterior = (distanciaPercorrida / prevItem.litros).toFixed(2);
+                    }
+                }
+
+                row.insertCell().textContent = formatDate(item.data);
+                row.insertCell().textContent = item.quilometragem.toLocaleString('pt-BR');
+                row.insertCell().textContent = item.litros.toFixed(2).replace('.', ',');
+                row.insertCell().textContent = formatCurrency(item.precoLitro);
+                row.insertCell().textContent = formatCurrency(item.valorTotal);
+                row.insertCell().textContent = item.tipoCombustivel;
+                row.insertCell().textContent = item.posto;
+                
+                const consumoCell = row.insertCell();
+                consumoCell.textContent = consumoAnterior ? formatKmPerLiter(parseFloat(consumoAnterior)) : 'N/A';
+                
+                // Formatação condicional para Consumo Anterior
+                consumoCell.classList.remove('consumo-bom', 'consumo-medio', 'consumo-alto');
+                if (consumoAnterior !== '') {
+                    const consumo = parseFloat(consumoAnterior);
+                    if (consumo >= 12) { // Exemplo de bom consumo
+                        consumoCell.classList.add('consumo-bom');
+                    } else if (consumo >= 8) { // Exemplo de consumo médio
+                        consumoCell.classList.add('consumo-medio');
+                    } else { // Exemplo de consumo alto
+                        consumoCell.classList.add('consumo-alto');
+                    }
+                }
+
+                row.insertCell().textContent = item.observacoes;
+            });
+        };
+
+        const renderManutencaoTable = () => {
+            const manutencoes = loadData('manutencao', currentDashboardMonth, currentDashboardYear)
+                                .sort((a, b) => new Date(a.data) - new Date(b.data));
+
+            tabelaManutencao.innerHTML = ''; // Limpa a tabela
+            manutencoes.forEach(item => {
+                const row = tabelaManutencao.insertRow();
+                row.className = 'hover:bg-gray-50';
+                row.insertCell().textContent = formatDate(item.data);
+                row.insertCell().textContent = item.tipoGasto;
+                row.insertCell().textContent = item.descricao;
+                row.insertCell().textContent = formatCurrency(item.valor);
+                row.insertCell().textContent = item.quilometragem ? item.quilometragem.toLocaleString('pt-BR') : '';
+            });
+        };
+
+        // --- Funções de Atualização do Dashboard ---
+        const updateDashboard = () => {
+            const abastecimentos = loadData('abastecimentos', currentDashboardMonth, currentDashboardYear)
+                                    .sort((a, b) => new Date(a.data) - new Date(b.data)); // Garante ordem para quilometragem
+
+            let totalLitros = 0;
+            let totalCustoCombustivel = 0;
+            let distanciaPercorrida = 0;
+            let quilometragemInicial = 0;
+            let quilometragemFinal = 0;
+
+            if (abastecimentos.length > 0) {
+                quilometragemInicial = abastecimentos[0].quilometragem;
+                quilometragemFinal = abastecimentos[abastecimentos.length - 1].quilometragem;
+                distanciaPercorrida = quilometragemFinal - quilometragemInicial;
+
+                abastecimentos.forEach(item => {
+                    totalLitros += item.litros;
+                    totalCustoCombustivel += item.valorTotal;
+                });
+            }
+
+            const consumoMedio = totalLitros > 0 ? distanciaPercorrida / totalLitros : 0;
+            const custoMedioLitro = totalLitros > 0 ? totalCustoCombustivel / totalLitros : 0;
+            const custoPorKm = distanciaPercorrida > 0 ? totalCustoCombustivel / distanciaPercorrida : 0;
+
+            dashboardDistanciaElem.textContent = ${distanciaPercorrida.toLocaleString('pt-BR')} km;
+            dashboardLitrosElem.textContent = ${totalLitros.toFixed(2).replace('.', ',')} L;
+            dashboardCustoTotalElem.textContent = formatCurrency(totalCustoCombustivel);
+            dashboardConsumoMedioElem.textContent = formatKmPerLiter(consumoMedio);
+            dashboardCustoLitroElem.textContent = formatRealPerLiter(custoMedioLitro);
+            dashboardCustoKmElem.textContent = formatRealPerKm(custoPorKm);
+
+            // Formatação condicional para Consumo Médio
+            dashboardConsumoMedioCard.classList.remove('consumo-bom', 'consumo-medio', 'consumo-alto');
+            if (consumoMedio > 0) {
+                if (consumoMedio >= 12) { // Exemplo de bom consumo
+                    dashboardConsumoMedioCard.classList.add('consumo-bom');
+                } else if (consumoMedio >= 8) { // Exemplo de consumo médio
+                    dashboardConsumoMedioCard.classList.add('consumo-medio');
+                } else { // Exemplo de consumo alto
+                    dashboardConsumoMedioCard.classList.add('consumo-alto');
+                }
+            }
+
+            // Formatação condicional para Custo por Quilômetro
+            dashboardCustoKmCard.classList.remove('consumo-bom', 'consumo-medio', 'consumo-alto');
+            if (custoPorKm > 0) {
+                if (custoPorKm <= 0.50) { // Exemplo de baixo custo por km
+                    dashboardCustoKmCard.classList.add('consumo-bom');
+                } else if (custoPorKm <= 0.80) { // Exemplo de custo médio por km
+                    dashboardCustoKmCard.classList.add('consumo-medio');
+                } else { // Exemplo de alto custo por km
+                    dashboardCustoKmCard.classList.add('consumo-alto');
+                }
+            }
+        };
+
+        // --- Inicialização de Seletores de Mês/Ano ---
+        const populateMonthYearSelectors = () => {
+            const months = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index + 1;
+                option.textContent = month;
+                dashboardMesSelect.appendChild(option);
+            });
+
+            const currentYearFull = new Date().getFullYear();
+            for (let i = currentYearFull - 5; i <= currentYearFull + 5; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                dashboardAnoSelect.appendChild(option);
+            }
+
+            dashboardMesSelect.value = currentDashboardMonth;
+            dashboardAnoSelect.value = currentDashboardYear;
+        };
+
+        // --- Event Listeners ---
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                button.classList.add('active');
+                document.getElementById(button.dataset.tab).classList.add('active');
+
+                // Atualiza o dashboard sempre que a aba é trocada
+                if (button.dataset.tab === 'dashboard') {
+                    updateDashboard();
+                }
+            });
+        });
+
+        // Listeners para mudança de Mês/Ano no Dashboard
+        dashboardMesSelect.addEventListener('change', (e) => {
+            currentDashboardMonth = parseInt(e.target.value);
+            renderAbastecimentosTable(); // Renderiza novamente com o filtro de data
+            renderManutencaoTable(); // Renderiza novamente com o filtro de data
+            updateDashboard();
+        });
+
+        dashboardAnoSelect.addEventListener('change', (e) => {
+            currentDashboardYear = parseInt(e.target.value);
+            renderAbastecimentosTable(); // Renderiza novamente com o filtro de data
+            renderManutencaoTable(); // Renderiza novamente com o filtro de data
+            updateDashboard();
+        });
+
+        // Formulário de Abastecimento
+        formAbastecimento.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const abastecimentos = loadData('abastecimentos', currentDashboardMonth, currentDashboardYear);
+
+            const litros = parseFloat(document.getElementById('abastecimentoLitros').value);
+            const precoLitro = parseFloat(document.getElementById('abastecimentoPrecoLitro').value);
+            const valorTotal = litros * precoLitro;
+
+            const novoAbastecimento = {
+                data: document.getElementById('abastecimentoData').value,
+                quilometragem: parseInt(document.getElementById('abastecimentoQuilometragem').value),
+                litros: litros,
+                precoLitro: precoLitro,
+                valorTotal: valorTotal,
+                tipoCombustivel: document.getElementById('abastecimentoTipoCombustivel').value,
+                posto: document.getElementById('abastecimentoPosto').value || '',
+                observacoes: document.getElementById('abastecimentoObservacoes').value || ''
+            };
+
+            abastecimentos.push(novoAbastecimento);
+            saveData('abastecimentos', abastecimentos, currentDashboardMonth, currentDashboardYear);
+            formAbastecimento.reset();
+            renderAbastecimentosTable();
+            updateDashboard();
+        });
+
+        // Formulário de Manutenção
+        formManutencao.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const manutencoes = loadData('manutencao', currentDashboardMonth, currentDashboardYear);
+
+            const novaManutencao = {
+                data: document.getElementById('manutencaoData').value,
+                tipoGasto: document.getElementById('manutencaoTipoGasto').value,
+                descricao: document.getElementById('manutencaoDescricao').value,
+                valor: parseFloat(document.getElementById('manutencaoValor').value),
+                quilometragem: document.getElementById('manutencaoQuilometragem').value ? parseInt(document.getElementById('manutencaoQuilometragem').value) : null
+            };
+
+            manutencoes.push(novaManutencao);
+            saveData('manutencao', manutencoes, currentDashboardMonth, currentDashboardYear);
+            formManutencao.reset();
+            renderManutencaoTable();
+        });
+
+        // --- Inicialização da Aplicação ---
+        const init = () => {
+            populateMonthYearSelectors();
+            renderAbastecimentosTable();
+            renderManutencaoTable();
+            updateDashboard();
+
+            // REGISTRO DO SERVICE WORKER
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(registration => {
+                            console.log('Service Worker registrado com sucesso:', registration);
+                        })
+                        .catch(error => {
+                            console.error('Falha no registro do Service Worker:', error);
+                        });
+                });
+            }
+        };
+
+        // Chama a função de inicialização quando o DOM estiver completamente carregado
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
