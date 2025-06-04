@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" >
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -254,28 +254,23 @@
         };
 
         // --- Elementos DOM ---
-        const tabButtons = document.querySelectorAll('.tab-button');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        // Dashboard
-        const dashboardMesSelect = document.getElementById('dashboardMes');
-        const dashboardAnoSelect = document.getElementById('dashboardAno');
-        const dashboardDistanciaElem = document.getElementById('dashboardDistancia');
-        const dashboardLitrosElem = document.getElementById('dashboardLitros');
-        const dashboardCustoTotalElem = document.getElementById('dashboardCustoTotal');
-        const dashboardConsumoMedioElem = document.getElementById('dashboardConsumoMedio');
-        const dashboardConsumoMedioCard = document.getElementById('dashboardConsumoMedioCard');
-        const dashboardCustoLitroElem = document.getElementById('dashboardCustoLitro');
-        const dashboardCustoKmElem = document.getElementById('dashboardCustoKm');
-        const dashboardCustoKmCard = document.getElementById('dashboardCustoKmCard');
-
-        // Registros de Abastecimento
-        const formAbastecimento = document.getElementById('formAbastecimento');
-        const tabelaAbastecimentos = document.getElementById('tabelaAbastecimentos');
-
-        // Manutenção/Outros Custos
-        const formManutencao = document.getElementById('formManutencao');
-        const tabelaManutencao = document.getElementById('tabelaManutencao');
+        // Variáveis globais para os elementos DOM, inicializadas no DOMContentLoaded
+        let tabButtons;
+        let tabContents;
+        let dashboardMesSelect;
+        let dashboardAnoSelect;
+        let dashboardDistanciaElem;
+        let dashboardLitrosElem;
+        let dashboardCustoTotalElem;
+        let dashboardConsumoMedioElem;
+        let dashboardConsumoMedioCard;
+        let dashboardCustoLitroElem;
+        let dashboardCustoKmElem;
+        let dashboardCustoKmCard;
+        let formAbastecimento;
+        let tabelaAbastecimentos;
+        let formManutencao;
+        let tabelaManutencao;
 
         // --- Variáveis de Estado ---
         let currentDashboardMonth = new Date().getMonth() + 1;
@@ -444,85 +439,107 @@
         };
 
         // --- Event Listeners ---
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
+        const setupEventListeners = () => {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
 
-                button.classList.add('active');
-                document.getElementById(button.dataset.tab).classList.add('active');
+                    button.classList.add('active');
+                    document.getElementById(button.dataset.tab).classList.add('active');
 
-                // Atualiza o dashboard sempre que a aba é trocada
-                if (button.dataset.tab === 'dashboard') {
-                    updateDashboard();
-                }
+                    // Atualiza o dashboard sempre que a aba é trocada
+                    if (button.dataset.tab === 'dashboard') {
+                        updateDashboard();
+                    }
+                });
             });
-        });
 
-        // Listeners para mudança de Mês/Ano no Dashboard
-        dashboardMesSelect.addEventListener('change', (e) => {
-            currentDashboardMonth = parseInt(e.target.value);
-            renderAbastecimentosTable(); // Renderiza novamente com o filtro de data
-            renderManutencaoTable(); // Renderiza novamente com o filtro de data
-            updateDashboard();
-        });
+            // Listeners para mudança de Mês/Ano no Dashboard
+            dashboardMesSelect.addEventListener('change', (e) => {
+                currentDashboardMonth = parseInt(e.target.value);
+                renderAbastecimentosTable(); // Renderiza novamente com o filtro de data
+                renderManutencaoTable(); // Renderiza novamente com o filtro de data
+                updateDashboard();
+            });
 
-        dashboardAnoSelect.addEventListener('change', (e) => {
-            currentDashboardYear = parseInt(e.target.value);
-            renderAbastecimentosTable(); // Renderiza novamente com o filtro de data
-            renderManutencaoTable(); // Renderiza novamente com o filtro de data
-            updateDashboard();
-        });
+            dashboardAnoSelect.addEventListener('change', (e) => {
+                currentDashboardYear = parseInt(e.target.value);
+                renderAbastecimentosTable(); // Renderiza novamente com o filtro de data
+                renderManutencaoTable(); // Renderiza novamente com o filtro de data
+                updateDashboard();
+            });
 
-        // Formulário de Abastecimento
-        formAbastecimento.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const abastecimentos = loadData('abastecimentos', currentDashboardMonth, currentDashboardYear);
+            // Formulário de Abastecimento
+            formAbastecimento.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const abastecimentos = loadData('abastecimentos', currentDashboardMonth, currentDashboardYear);
 
-            const litros = parseFloat(document.getElementById('abastecimentoLitros').value);
-            const precoLitro = parseFloat(document.getElementById('abastecimentoPrecoLitro').value);
-            const valorTotal = litros * precoLitro;
+                const litros = parseFloat(document.getElementById('abastecimentoLitros').value);
+                const precoLitro = parseFloat(document.getElementById('abastecimentoPrecoLitro').value);
+                const valorTotal = litros * precoLitro;
 
-            const novoAbastecimento = {
-                data: document.getElementById('abastecimentoData').value,
-                quilometragem: parseInt(document.getElementById('abastecimentoQuilometragem').value),
-                litros: litros,
-                precoLitro: precoLitro,
-                valorTotal: valorTotal,
-                tipoCombustivel: document.getElementById('abastecimentoTipoCombustivel').value,
-                posto: document.getElementById('abastecimentoPosto').value || '',
-                observacoes: document.getElementById('abastecimentoObservacoes').value || ''
-            };
+                const novoAbastecimento = {
+                    data: document.getElementById('abastecimentoData').value,
+                    quilometragem: parseInt(document.getElementById('abastecimentoQuilometragem').value),
+                    litros: litros,
+                    precoLitro: precoLitro,
+                    valorTotal: valorTotal,
+                    tipoCombustivel: document.getElementById('abastecimentoTipoCombustivel').value,
+                    posto: document.getElementById('abastecimentoPosto').value || '',
+                    observacoes: document.getElementById('abastecimentoObservacoes').value || ''
+                };
 
-            abastecimentos.push(novoAbastecimento);
-            saveData('abastecimentos', abastecimentos, currentDashboardMonth, currentDashboardYear);
-            formAbastecimento.reset();
-            renderAbastecimentosTable();
-            updateDashboard();
-        });
+                abastecimentos.push(novoAbastecimento);
+                saveData('abastecimentos', abastecimentos, currentDashboardMonth, currentDashboardYear);
+                formAbastecimento.reset();
+                renderAbastecimentosTable();
+                updateDashboard();
+            });
 
-        // Formulário de Manutenção
-        formManutencao.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const manutencoes = loadData('manutencao', currentDashboardMonth, currentDashboardYear);
+            // Formulário de Manutenção
+            formManutencao.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const manutencoes = loadData('manutencao', currentDashboardMonth, currentDashboardYear);
 
-            const novaManutencao = {
-                data: document.getElementById('manutencaoData').value,
-                tipoGasto: document.getElementById('manutencaoTipoGasto').value,
-                descricao: document.getElementById('manutencaoDescricao').value,
-                valor: parseFloat(document.getElementById('manutencaoValor').value),
-                quilometragem: document.getElementById('manutencaoQuilometragem').value ? parseInt(document.getElementById('manutencaoQuilometragem').value) : null
-            };
+                const novaManutencao = {
+                    data: document.getElementById('manutencaoData').value,
+                    tipoGasto: document.getElementById('manutencaoTipoGasto').value,
+                    descricao: document.getElementById('manutencaoDescricao').value,
+                    valor: parseFloat(document.getElementById('manutencaoValor').value),
+                    quilometragem: document.getElementById('manutencaoQuilometragem').value ? parseInt(document.getElementById('manutencaoQuilometragem').value) : null
+                };
 
-            manutencoes.push(novaManutencao);
-            saveData('manutencao', manutencoes, currentDashboardMonth, currentDashboardYear);
-            formManutencao.reset();
-            renderManutencaoTable();
-        });
+                manutencoes.push(novaManutencao);
+                saveData('manutencao', manutencoes, currentDashboardMonth, currentDashboardYear);
+                formManutencao.reset();
+                renderManutencaoTable();
+            });
+        };
+
 
         // --- Inicialização da Aplicação ---
         const init = () => {
+            // Inicializa as variáveis DOM aqui, garantindo que os elementos existam
+            tabButtons = document.querySelectorAll('.tab-button');
+            tabContents = document.querySelectorAll('.tab-content');
+            dashboardMesSelect = document.getElementById('dashboardMes');
+            dashboardAnoSelect = document.getElementById('dashboardAno');
+            dashboardDistanciaElem = document.getElementById('dashboardDistancia');
+            dashboardLitrosElem = document.getElementById('dashboardLitros');
+            dashboardCustoTotalElem = document.getElementById('dashboardCustoTotal');
+            dashboardConsumoMedioElem = document.getElementById('dashboardConsumoMedio');
+            dashboardConsumoMedioCard = document.getElementById('dashboardConsumoMedioCard');
+            dashboardCustoLitroElem = document.getElementById('dashboardCustoLitro');
+            dashboardCustoKmElem = document.getElementById('dashboardCustoKm');
+            dashboardCustoKmCard = document.getElementById('dashboardCustoKmCard');
+            formAbastecimento = document.getElementById('formAbastecimento');
+            tabelaAbastecimentos = document.getElementById('tabelaAbastecimentos');
+            formManutencao = document.getElementById('formManutencao');
+            tabelaManutencao = document.getElementById('tabelaManutencao');
+
             populateMonthYearSelectors();
+            setupEventListeners(); // Configura os event listeners
             renderAbastecimentosTable();
             renderManutencaoTable();
             updateDashboard();
