@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[00:19, 04/06/2025] Fernandes: <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +11,24 @@
     <!-- Se o site for jaddyf.github.io/Controle-de-Combust-vel/, use /Controle-de-Combust-vel/manifest.json -->
     <!-- Se o site for jaddyf.github.io/, use /manifest.json -->
     <link rel="manifest" href="/Controle-de-Combust-vel/manifest.json">
+    <style>
+       …
+[00:27, 04/06/2025] Fernandes: <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Consumo de Combustível</title>
+    <!-- Define a base URL para todos os caminhos relativos no seu site do GitHub Pages -->
+    <!-- Substitua 'Controle-de-Combust-vel' pelo nome exato do seu repositório se for diferente -->
+    <base href="/Controle-de-Combust-vel/">
+
+    <!-- Inclui Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- LINK PARA O MANIFEST PWA - Agora usa caminho relativo à base -->
+    <link rel="manifest" href="manifest.json">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -123,7 +141,7 @@
                 </div>
                 <div>
                     <label for="abastecimentoTipoCombustivel" class="block text-sm font-medium text-gray-700">Tipo de Combustível:</label>
-                    <select id="abastecimentoTipoCombustivel" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <select id="abastecimentoTipoCombustivel" required class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:focus:border-indigo-500 sm:text-sm">
                         <option value="">Selecione o tipo</option>
                         <option value="Gasolina Comum">Gasolina Comum</option>
                         <option value="Gasolina Aditivada">Gasolina Aditivada</option>
@@ -252,7 +270,7 @@
         const formatDate = (dateString) => {
             if (!dateString) return '';
             const [year, month, day] = dateString.split('-');
-            return `${day}/${month}/${year}`;
+            return ${day}/${month}/${year};
         };
 
         // --- Elementos DOM ---
@@ -280,7 +298,7 @@
 
         // --- Funções de Armazenamento de Dados (LocalStorage) ---
         const getLocalStorageKey = (type, month, year) => {
-            return `combustivel_${type}_${year}-${String(month).padStart(2, '0')}`;
+            return combustivel_${type}_${year}-${String(month).padStart(2, '0')};
         };
 
         const loadData = (type, month = currentDashboardMonth, year = currentDashboardYear) => {
@@ -384,8 +402,8 @@
             const custoMedioLitro = totalLitros > 0 ? totalCustoCombustivel / totalLitros : 0;
             const custoPorKm = distanciaPercorrida > 0 ? totalCustoCombustivel / distanciaPercorrida : 0;
 
-            dashboardDistanciaElem.textContent = `${distanciaPercorrida.toLocaleString('pt-BR')} km`;
-            dashboardLitrosElem.textContent = `${totalLitros.toFixed(2).replace('.', ',')} L`;
+            dashboardDistanciaElem.textContent = ${distanciaPercorrida.toLocaleString('pt-BR')} km;
+            dashboardLitrosElem.textContent = ${totalLitros.toFixed(2).replace('.', ',')} L;
             dashboardCustoTotalElem.textContent = formatCurrency(totalCustoCombustivel);
             dashboardConsumoMedioElem.textContent = formatKmPerLiter(consumoMedio);
             dashboardCustoLitroElem.textContent = formatRealPerLiter(custoMedioLitro);
@@ -550,8 +568,8 @@
             // REGISTRO DO SERVICE WORKER
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    // O caminho para o service worker também precisa ser relativo ao repositório
-                    navigator.serviceWorker.register('/Controle-de-Combust-vel/sw.js')
+                    // O caminho para o service worker agora é relativo à base URL do site
+                    navigator.serviceWorker.register('sw.js')
                         .then(registration => {
                             console.log('Service Worker registrado com sucesso:', registration);
                         })
